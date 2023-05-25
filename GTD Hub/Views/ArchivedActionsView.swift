@@ -13,13 +13,33 @@ struct ArchivedActionsView: View {
     var body: some View {
         List {
             ForEach(nextActionsViewModel.completedActionItems) { actionItem in
-                ActionItemView(actionItem: actionItem)
+                ActionItemView(
+                    action: actionItem,
+                    actionCompletion: {},
+                    color: .green
+                )
+                .contextMenu {
+                    Button(action: {
+                        withAnimation {
+                            nextActionsViewModel.updateActionCompletionStatus(inputAction: actionItem)
+                        }
+                    }) {
+                        Text("Unmark Complete")
+                        Image(systemName: "checkmark.circle")
+                    }
+                }
             }
+            .onDelete(perform: nextActionsViewModel.removeAction)
         }
         .navigationTitle("Archived Actions")
-        .navigationBarItems(trailing: EditButton())
+        .navigationBarItems(leading: EditButton(), trailing: Button(action: {
+            nextActionsViewModel.removeAllCompletedActions()
+        }) {
+            Text("Delete All")
+        })
     }
 }
+
 
 
 struct ArchivedActionsView_Previews: PreviewProvider {
@@ -27,6 +47,8 @@ struct ArchivedActionsView_Previews: PreviewProvider {
         NavigationView {
             ArchivedActionsView()
         }
-        .environmentObject(NextActionsViewModel())
+        .environmentObject(NextActionsViewModel(coordinator: ProjectActionCoordinator()))
     }
 }
+
+

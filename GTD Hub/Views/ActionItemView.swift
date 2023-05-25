@@ -9,27 +9,58 @@ import SwiftUI
 
 
 struct ActionItemView: View {
-    
-    let actionItem: Action
+    let action: Action
+    let actionCompletion: () -> Void
+    let color: Color
     
     var body: some View {
-        HStack{
-            Image(systemName: actionItem.isCompleted ? "checkmark.circle" : "circle")
-                .foregroundColor(actionItem.isCompleted ? .blue : .black)
-            Text(actionItem.title)
+        HStack {
+            VStack(alignment: .leading) {
+                Text(action.title)
+                    .font(.headline)
+                    .foregroundColor(color)
+                Text(dueOrCompletedDateText)
+                    .font(.subheadline)
+                    .foregroundColor(color)
+            }
             Spacer()
+            Button(action: actionCompletion) {
+                Image(systemName: action.isCompleted ? "checkmark.circle.fill" : "circle")
+            }
+            .buttonStyle(PlainButtonStyle())
+            .foregroundColor(color)
         }
-        .padding(.vertical, 9.0)
-        .font(/*@START_MENU_TOKEN@*/.title3/*@END_MENU_TOKEN@*/)
+        .padding()
+    }
+
+    private var dueOrCompletedDateText: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
         
+        if action.isCompleted, let completionDate = action.completionDate {
+            return "Completed on: \(formatter.string(from: completionDate))"
+        } else if let dueDate = action.dueDate {
+            return "Due on: \(formatter.string(from: dueDate))"
+        } else {
+            return "No date"
+        }
     }
 }
 
 struct ActionItemView_Previews: PreviewProvider {
-    
-    static var item1 = Action (title: "action 1", isCompleted: true)
-
     static var previews: some View {
-            ActionItemView(actionItem: item1)
+        Group {
+            ActionItemView(
+                action: Action(id: UUID(), title: "Incomplete Action", isCompleted: false, dueDate: Date(), completionDate: nil),
+                actionCompletion: {},
+                color: .black
+            )
+            ActionItemView(
+                action: Action(id: UUID(), title: "Completed Action", isCompleted: true, dueDate: Date(), completionDate: Date()),
+                actionCompletion: {},
+                color: .green
+            )
+        }
+        .previewLayout(.sizeThatFits)
     }
 }

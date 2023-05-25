@@ -61,7 +61,7 @@ struct AddProjectView: View {
 struct AddProjectView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            AddProjectView().environmentObject(AllProjectsViewModel())
+            AddProjectView().environmentObject(AllProjectsViewModel(coordinator: ProjectActionCoordinator()))
         }
     }
 }

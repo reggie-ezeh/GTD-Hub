@@ -7,126 +7,6 @@
 
 import SwiftUI
 
-
-
-struct TextFieldAlert<Presenting>: View where Presenting: View {
-    @State var invalidAlertTitle: String = ""
-    @State var showInvalidAlert: Bool = false
-
-    @Binding var isShowing: Bool
-    @Binding var text: String
-    let presenting: () -> Presenting
-    let onSave: (String) -> Void
-    
-    var body: some View {
-        ZStack {
-            if isShowing {
-                Rectangle()
-                    .fill(Color.black.opacity(0.4))
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture { isShowing = false }
-                
-                VStack {
-                    Text("Rename")
-                        .font(.headline)
-                    
-                    TextField("New action title", text: $text)
-                        .padding()
-                    
-                    HStack {
-                        Button("Save") {
-                            if isValidAcion(inputText: text){
-                                onSave(text)
-                                isShowing = false
-                            } else {
-                                invalidAlertTitle = "Invalid Action Item"
-                                showInvalidAlert.toggle()
-                            }
-                        }
-                        
-                        Spacer()
-                        
-                        Button("Cancel") {
-                            isShowing = false
-                        }
-                    }
-                    .padding()
-                }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(8)
-            } else {
-                presenting()
-                    .disabled(isShowing)
-            }
-        }
-        .alert(isPresented: $showInvalidAlert, content: getInvalidAlert)
-    }
-    
-    
-    func isValidAcion(inputText: String) -> Bool {
-        return inputText.count<2 ? false : true
-    }
-    func getInvalidAlert() -> Alert {
-        return Alert(title: Text(invalidAlertTitle))
-    }
-}
-
-struct DueDatePickerAlert<Presenting>: View where Presenting: View {
-    @Binding var isShowing: Bool
-    @State private var date: Date
-    let presenting: () -> Presenting
-    let onSave: (Date) -> Void
-    
-    init(isShowing: Binding<Bool>, selectedDate: Date, presenting: @escaping () -> Presenting, onSave: @escaping (Date) -> Void) {
-        self._isShowing = isShowing
-        self._date = State(initialValue: selectedDate)
-        self.presenting = presenting
-        self.onSave = onSave
-    }
-    
-    var body: some View {
-        ZStack {
-            if isShowing {
-                Rectangle()
-                    .fill(Color.black.opacity(0.4))
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture { isShowing = false }
-                
-                VStack {
-                    Text("Change Due Date")
-                        .font(.headline)
-                    
-                    DatePicker("Due Date", selection: $date, displayedComponents: .date)
-                        .datePickerStyle(WheelDatePickerStyle())
-                        .padding()
-                    
-                    HStack {
-                        Button("Save") {
-                            onSave(date)
-                            isShowing = false
-                        }
-                        
-                        Spacer()
-                        
-                        Button("Cancel") {
-                            isShowing = false
-                        }
-                    }
-                    .padding()
-                }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(8)
-            } else {
-                presenting()
-                    .disabled(isShowing)
-            }
-        }
-    }
-}
-
-
 struct NextActionsView: View {
     @EnvironmentObject var nextActionsViewModel: NextActionsViewModel
 
@@ -138,44 +18,52 @@ struct NextActionsView: View {
 
     var body: some View {
         List {
-            ForEach(nextActionsViewModel.allActionItems)  { actionItem in
-                ActionItemView(actionItem: actionItem)
-                    .onTapGesture {
+            ForEach(nextActionsViewModel.allActionItems) { actionItem in
+                ActionItemView(
+                    action: actionItem,
+                    actionCompletion: {
                         withAnimation(.linear) {
                             nextActionsViewModel.updateActionCompletionStatus(inputAction: actionItem)
                         }
+                    },
+                    color: actionItem.isCompleted ? .green : .black
+                )
+                .contextMenu {
+                    Button(action: {
+                        withAnimation {
+                            nextActionsViewModel.updateActionCompletionStatus(inputAction: actionItem)
+                        }
+                    }) {
+                        Text(actionItem.isCompleted ? "Unmark Complete" : "Mark Complete")
+                        Image(systemName: "checkmark.circle")
                     }
-                    .contextMenu {
-                        Button(action: {
-                            withAnimation {
-                                nextActionsViewModel.updateActionCompletionStatus(inputAction: actionItem)
-                            }
-                        }) {
-                            Text(actionItem.isCompleted ? "Unmark Complete" : "Mark Complete")
-                            Image(systemName: "checkmark.circle")
-                        }
 
-                        Button(action: {
-                            self.selectedAction = actionItem
-                            self.showTextFieldPopup.toggle()
-                        }) {
-                            Text("Rename")
-                            Image(systemName: "pencil")
-                        }
-
-                        Button(action: {
-                            self.selectedAction = actionItem
-                            self.showDueDatePicker.toggle()
-                        }) {
-                            Text("Change Due Date")
-                            Image(systemName: "calendar")
-                        }
-
-                        // Implement "Add to existing Project" functionality
+                    Button(action: {
+                        self.selectedAction = actionItem
+                        self.showTextFieldPopup.toggle()
+                    }) {
+                        Text("Rename")
+                        Image(systemName: "pencil")
                     }
+
+                    Button(action: {
+                        self.selectedAction = actionItem
+                        self.showDueDatePicker.toggle()
+                    }) {
+                        Text("Change Due Date")
+                        Image(systemName: "calendar")
+                    }
+
+                    Menu("Add to Project") {
+                        ForEach(nextActionsViewModel.allProjectItems, id: \.id) { project in
+                            Button(project.title, action: {
+                                nextActionsViewModel.addActionToProject(action: actionItem, projectId: project.id)
+                            })
+                        }
+                    }
+                }
             }
             .onDelete(perform: nextActionsViewModel.removeAction)
-            .onMove(perform: nextActionsViewModel.moveAction)
         }
         .navigationTitle("Next Actions")
         .navigationBarItems(
@@ -210,6 +98,7 @@ struct NextActionsView: View {
 
 
 
+
 extension View {
     func textFieldAlert(isPresented: Binding<Bool>, text: Binding<String>, onSave: @escaping (String) -> Void) -> some View {
         TextFieldAlert(isShowing: isPresented, text: text, presenting: { self }, onSave: onSave)
@@ -225,7 +114,7 @@ struct NextActionsView_Previews: PreviewProvider {
         NavigationView {
             NextActionsView()
         }
-        .environmentObject(NextActionsViewModel())
+        .environmentObject(NextActionsViewModel(coordinator: ProjectActionCoordinator()))
     }
 }
 

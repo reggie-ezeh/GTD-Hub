@@ -17,7 +17,7 @@ struct AddInboxItemView: View {
                 TextField("Write something…", text: $inputText)
             
                 Button(action: saveButtonClicked) {
-                    Text("Save")
+                    Text("Capture")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)

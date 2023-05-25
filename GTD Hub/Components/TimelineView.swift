@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TimelineView: View {
     let actions: [Action]
+    let viewModel: NextActionsViewModel
     
     var body: some View {
         ScrollView {
@@ -16,8 +17,8 @@ struct TimelineView: View {
                 ForEach(actions.sorted(by: { ($0.dueDate ?? Date.distantFuture) < ($1.dueDate ?? Date.distantFuture) })) { action in
                     HStack(alignment: .top, spacing: 8) {
                         Text(getFormattedDate(date: action.dueDate))
-                            .foregroundColor(.gray)
-                        
+                            .foregroundColor(action.isCompleted ? .green : .gray)
+                            
                         VStack {
                             Circle()
                                 .frame(width: 8, height: 8)
@@ -28,14 +29,14 @@ struct TimelineView: View {
                                 .frame(width: 2)
                         }
                         
-                        Text(action.title)
-                            .font(.system(size: 18))
-                            .foregroundColor(.black)
-                            .fixedSize(horizontal: false, vertical: true)
+                        ActionItemView(action: action, actionCompletion: {
+                            viewModel.updateActionCompletionStatus(inputAction: action)
+                        }, color: action.isCompleted ? .green : .black)
                         
                         Spacer()
                     }
                 }
+                
                 .padding(.horizontal)
             }
         }
@@ -51,6 +52,7 @@ struct TimelineView: View {
         return formatter.string(from: date)
     }
 }
+
 
 
 //struct TimelineView_Previews: PreviewProvider {

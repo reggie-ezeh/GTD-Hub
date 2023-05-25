@@ -39,7 +39,7 @@ struct InboxItemView: View {
 
 struct InboxItemView_Previews: PreviewProvider {
     static var previews: some View {
-        InboxItemView(inboxItem: InboxItem(title: "Call my friends about eating at KFC next weekend", captureDate: Date()))
+        InboxItemView(inboxItem: InboxItem(title: "Inbox test 1", captureDate: Date()))
     }
 }
 

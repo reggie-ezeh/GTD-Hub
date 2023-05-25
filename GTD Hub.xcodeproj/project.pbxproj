@@ -31,6 +31,11 @@
 		2F80E6102A17E05F006C0875 /* AddInboxItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F80E60F2A17E05F006C0875 /* AddInboxItemView.swift */; };
 		2F80E6122A17FFC6006C0875 /* HomePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F80E6112A17FFC6006C0875 /* HomePageView.swift */; };
 		2F80E6142A1B04CB006C0875 /* ArchivedActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F80E6132A1B04CB006C0875 /* ArchivedActionsView.swift */; };
+		2F80E6162A1D6B66006C0875 /* ProjectActionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F80E6152A1D6B66006C0875 /* ProjectActionCoordinator.swift */; };
+		2F80E61A2A1DD162006C0875 /* TextFieldAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F80E6192A1DD162006C0875 /* TextFieldAlert.swift */; };
+		2F80E61C2A1DD18C006C0875 /* DueDatePickerAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F80E61B2A1DD18C006C0875 /* DueDatePickerAlert.swift */; };
+		2F80E61E2A1E95A3006C0875 /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F80E61D2A1E95A3006C0875 /* ProgressBar.swift */; };
+		2F80E6202A1F94FE006C0875 /* CircularProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F80E61F2A1F94FE006C0875 /* CircularProgressBar.swift */; };
 		2F99343929E7465300AEAE70 /* AllProjectsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F99343829E7465300AEAE70 /* AllProjectsViewModel.swift */; };
 		2F99343B29E99B2700AEAE70 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F99343A29E99B2700AEAE70 /* Project.swift */; };
 		2F99343D29E99BD800AEAE70 /* ProjectItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F99343C29E99BD800AEAE70 /* ProjectItemView.swift */; };
@@ -64,6 +69,11 @@
 		2F80E60F2A17E05F006C0875 /* AddInboxItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddInboxItemView.swift; sourceTree = "<group>"; };
 		2F80E6112A17FFC6006C0875 /* HomePageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePageView.swift; sourceTree = "<group>"; };
 		2F80E6132A1B04CB006C0875 /* ArchivedActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchivedActionsView.swift; sourceTree = "<group>"; };
+		2F80E6152A1D6B66006C0875 /* ProjectActionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectActionCoordinator.swift; sourceTree = "<group>"; };
+		2F80E6192A1DD162006C0875 /* TextFieldAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldAlert.swift; sourceTree = "<group>"; };
+		2F80E61B2A1DD18C006C0875 /* DueDatePickerAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueDatePickerAlert.swift; sourceTree = "<group>"; };
+		2F80E61D2A1E95A3006C0875 /* ProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
+		2F80E61F2A1F94FE006C0875 /* CircularProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressBar.swift; sourceTree = "<group>"; };
 		2F99343829E7465300AEAE70 /* AllProjectsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllProjectsViewModel.swift; sourceTree = "<group>"; };
 		2F99343A29E99B2700AEAE70 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
 		2F99343C29E99BD800AEAE70 /* ProjectItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectItemView.swift; sourceTree = "<group>"; };
@@ -122,6 +132,7 @@
 		2F267F6E29D4968700577269 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				2F80E6152A1D6B66006C0875 /* ProjectActionCoordinator.swift */,
 				2F80E60D2A17DF14006C0875 /* InboxViewModel.swift */,
 				2F267F6F29D496F200577269 /* NextActionsViewModel.swift */,
 				2F99343829E7465300AEAE70 /* AllProjectsViewModel.swift */,
@@ -135,6 +146,10 @@
 			children = (
 				2F80E5F92A0ED9E0006C0875 /* TimelineView.swift */,
 				2F80E5FB2A15444E006C0875 /* MultipleSelectionRow.swift */,
+				2F80E6192A1DD162006C0875 /* TextFieldAlert.swift */,
+				2F80E61B2A1DD18C006C0875 /* DueDatePickerAlert.swift */,
+				2F80E61D2A1E95A3006C0875 /* ProgressBar.swift */,
+				2F80E61F2A1F94FE006C0875 /* CircularProgressBar.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -187,6 +202,7 @@
 				2FB9AFB629C654D20026BFC3 /* Sources */,
 				2FB9AFB729C654D20026BFC3 /* Frameworks */,
 				2FB9AFB829C654D20026BFC3 /* Resources */,
+				2F80E6232A1FDCD9006C0875 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -242,6 +258,26 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		2F80E6232A1FDCD9006C0875 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		2FB9AFB629C654D20026BFC3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -252,14 +288,17 @@
 				2F80E6102A17E05F006C0875 /* AddInboxItemView.swift in Sources */,
 				2F80E6062A171FF8006C0875 /* AddReferenceView.swift in Sources */,
 				2F267F6529D0FCF200577269 /* NextActionsView.swift in Sources */,
+				2F80E6202A1F94FE006C0875 /* CircularProgressBar.swift in Sources */,
 				2F267F6729D1E1FF00577269 /* ActionItemView.swift in Sources */,
 				2F80E5F02A0EBE76006C0875 /* AddProjectView.swift in Sources */,
 				2F80E6122A17FFC6006C0875 /* HomePageView.swift in Sources */,
 				2F80E60A2A1720D7006C0875 /* ReferencesViewModel.swift in Sources */,
 				2F80E5F22A0EBECC006C0875 /* ActiveProjectsListView.swift in Sources */,
+				2F80E61A2A1DD162006C0875 /* TextFieldAlert.swift in Sources */,
 				2F99343D29E99BD800AEAE70 /* ProjectItemView.swift in Sources */,
 				2F99343929E7465300AEAE70 /* AllProjectsViewModel.swift in Sources */,
 				2F80E5F82A0EC2AD006C0875 /* EditProjectView.swift in Sources */,
+				2F80E61C2A1DD18C006C0875 /* DueDatePickerAlert.swift in Sources */,
 				2F267F6929D1F83A00577269 /* AddActionView.swift in Sources */,
 				2F80E6022A171F5E006C0875 /* ReferenceItem.swift in Sources */,
 				2F80E5F62A0EC0CC006C0875 /* ProjectPageView.swift in Sources */,
@@ -267,6 +306,8 @@
 				2F267F7029D496F200577269 /* NextActionsViewModel.swift in Sources */,
 				2F99343B29E99B2700AEAE70 /* Project.swift in Sources */,
 				2F80E5F42A0EBF0E006C0875 /* ArchivedProjectsListView.swift in Sources */,
+				2F80E61E2A1E95A3006C0875 /* ProgressBar.swift in Sources */,
+				2F80E6162A1D6B66006C0875 /* ProjectActionCoordinator.swift in Sources */,
 				2F80E5FE2A16FA17006C0875 /* InboxItem.swift in Sources */,
 				2F80E5FA2A0ED9E0006C0875 /* TimelineView.swift in Sources */,
 				2F80E5FC2A15444E006C0875 /* MultipleSelectionRow.swift in Sources */,

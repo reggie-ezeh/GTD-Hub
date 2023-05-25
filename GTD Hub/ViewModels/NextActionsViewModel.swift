@@ -9,94 +9,88 @@ import Foundation
 
 //This class handles the logic for the Next Actions view page
 //ObservalbeObject makes this appear as an observable object
-class NextActionsViewModel: ObservableObject{
+class NextActionsViewModel: ObservableObject {
     
-    @Published var allActionItems:[Action] = [] {
-        didSet{
-            saveActions()
-        }
+    @Published var coordinator: ProjectActionCoordinator
+
+    var allActionItems:[Action] {
+        coordinator.actions.filter { !$0.isCompleted }
     }
     
-    @Published var completedActionItems:[Action] = [] {
-        didSet{
-            saveActions()
-        }
+    var completedActionItems:[Action] {
+        coordinator.actions.filter { $0.isCompleted }
     }
     
-    @Published var allProjectItems:[Project] = []
+    var allProjectItems:[Project] {
+        coordinator.projects
+    }
 
+    init(coordinator: ProjectActionCoordinator) {
+        self.coordinator = coordinator
+    }
     
-    let allActionItemsKey = "actions_list"
-    let completedActionItemsKey = "completed_actions_list"
-    
-    weak var coordinator: ProjectActionCoordinatorProtocol?
-
-
-    func removeAction(at offsets: IndexSet) {
-        allActionItems.remove(atOffsets: offsets)
+    func removeAction(at indexSet: IndexSet) {
+        for index in indexSet {
+            let action = allActionItems[index]
+            if let indexInCoordinator = coordinator.actions.firstIndex(where: {$0.id == action.id}) {
+                coordinator.actions.remove(at: indexInCoordinator)
+                objectWillChange.send()  // Manually trigger a view update
+            }
+        }
     }
     
     func renameActionTitle(inputAction: Action, newTitle: String) {
-        if let index = allActionItems.firstIndex(where: {$0.id == inputAction.id}) {
-            allActionItems[index] = inputAction.updateTitle(newTitle: newTitle)
+        if let index = coordinator.actions.firstIndex(where: {$0.id == inputAction.id}) {
+            coordinator.actions[index] = inputAction.updateTitle(newTitle: newTitle)
+            objectWillChange.send()  // Manually trigger a view update
+
         }
+
     }
     
     func updateActionDueDate(inputAction: Action, newDueDate: Date) {
-        if let index = allActionItems.firstIndex(where: {$0.id == inputAction.id}) {
-            allActionItems[index] = inputAction.updateDueDate(newDueDate: newDueDate)
+        if let index = coordinator.actions.firstIndex(where: {$0.id == inputAction.id}) {
+            coordinator.actions[index] = inputAction.updateDueDate(newDueDate: newDueDate)
         }
     }
     
-    func moveAction( from: IndexSet, to: Int){
-        allActionItems.move(fromOffsets: from, toOffset: to)
-    }
-    
-    func addActionItem(title: String, dueDate: Date, selectedProjectIds: [String]){
-        let newAction = Action(title: title, isCompleted: false, projects: selectedProjectIds)
-        allActionItems.append(newAction)
+    /**This function creates a new Action and appends it to the coordinator's actions array.
+     It then loops through the selectedProjectIds and, for each one, finds the corresponding Project in the coordinator's projects array.
+     It then appends the new action's id to the project's actionIds array.**/
+    func addActionItem(title: String, dueDate: Date, selectedProjectIds: [UUID]) {
+        let newAction = Action(title: title, isCompleted: false, dueDate: dueDate)
+        coordinator.actions.append(newAction)
+        objectWillChange.send()  // Manually trigger a view update
 
-        // Add the new action to each selected project
+
+        // Update the selected projects with the new action's id.
         for projectId in selectedProjectIds {
-            if let project = allProjectsViewModel.findProject(by: projectId) {
-                allProjectsViewModel.addActionToProject(action: newAction, to: project)
+            if let index = coordinator.projects.firstIndex(where: { $0.id == projectId }) {
+                coordinator.projects[index].actionIds.append(newAction.id)
+                objectWillChange.send()  // Manually trigger a view update
             }
         }
-    }
 
+    }
+    
+    func addActionToProject(action: Action, projectId: UUID) {
+        coordinator.addActionToProject(action: action, to: projectId)
+    }
     
     func updateActionCompletionStatus(inputAction: Action){
-        if let index = allActionItems.firstIndex(where: {$0.id == inputAction.id}){
+        if let index = coordinator.actions.firstIndex(where: {$0.id == inputAction.id}){
             //replace that same action with a new Action object with the opposite completion status
             let updatedAction = inputAction.updateCompletion()
-            allActionItems[index] = updatedAction
-            
-            // If updated action is complete, move it from allActionItems to completedActionItems
-            if updatedAction.isCompleted {
-                completedActionItems.append(updatedAction)
-                allActionItems.remove(at: index)
-            }
+            coordinator.actions[index] = updatedAction
+            objectWillChange.send()  // Manually trigger a view update
+
         }
     }
     
-    func saveActions(){
-        if let encoded = try? JSONEncoder().encode(allActionItems){
-            UserDefaults.standard.set(encoded, forKey: allActionItemsKey)
-        }
-        if let encodedCompleted = try? JSONEncoder().encode(completedActionItems){
-            UserDefaults.standard.set(encodedCompleted, forKey: completedActionItemsKey)
-        }
-    }
-    
-    func getActions(){
-        guard let actionsData = UserDefaults.standard.data(forKey: allActionItemsKey) else {return}
-        guard let decoded = try? JSONDecoder().decode([Action].self, from: actionsData) else {return}
-        
-        guard let completedActionsData = UserDefaults.standard.data(forKey: completedActionItemsKey) else {return}
-        guard let decodedCompleted = try? JSONDecoder().decode([Action].self, from: completedActionsData) else {return}
-        
-        self.allActionItems = decoded
-        self.completedActionItems = decodedCompleted
+    func removeAllCompletedActions() {
+        coordinator.actions.removeAll(where: { $0.isCompleted })
+        objectWillChange.send()  // Manually trigger a view update
     }
 }
+
 

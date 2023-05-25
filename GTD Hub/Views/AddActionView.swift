@@ -15,18 +15,21 @@ struct AddActionView: View {
     @State private var titleTextField: String
     @State private var dueDate: Date = Date()
     @State private var showDatePicker: Bool = false
-    @State private var selectedProjects: [Project] = []
-    let associatedProject: Project?
+    @State private var selectedProjectIds: [UUID] = []
+    let associatedProjectId: UUID?
     
     @State private var alertTitle: String = ""
     @State private var showAlert: Bool = false
     
-    init(title: String = "", associatedProject: Project? = nil) {
-        self.associatedProject = associatedProject
+    init(title: String = "", associatedProjectId: UUID? = nil) {
+        self.associatedProjectId = associatedProjectId
         _titleTextField = State(initialValue: title)
-        _selectedProjects = State(initialValue: associatedProject != nil ? [associatedProject!] : [])
+        if let associatedProjectId = associatedProjectId {
+            _selectedProjectIds = State(initialValue: [associatedProjectId])
+        } else {
+            _selectedProjectIds = State(initialValue: [])
+        }
     }
-    
     var body: some View {
         ScrollView {
             VStack {
@@ -54,12 +57,12 @@ struct AddActionView: View {
                 Text("Projects:")
                 List {
                     ForEach(allProjectsViewModel.allProjectItems, id: \.self) { project in
-                        MultipleSelectionRow(title: project.title, isSelected: self.selectedProjects.contains(project)) {
-                            if self.selectedProjects.contains(project) {
-                                self.selectedProjects.removeAll(where: { $0.id == project.id })
+                        MultipleSelectionRow(title: project.title, isSelected: self.selectedProjectIds.contains(project.id)) {
+                            if self.selectedProjectIds.contains(project.id) {
+                                self.selectedProjectIds.removeAll(where: { $0 == project.id })
                             }
                             else {
-                                self.selectedProjects.append(project)
+                                self.selectedProjectIds.append(project.id)
                             }
                         }
                     }
@@ -92,7 +95,6 @@ struct AddActionView: View {
     
     func addButtonClicked() {
         if isValidAcion() {
-            let selectedProjectIds = selectedProjects.map { $0.id }
             nextActionsViewModel.addActionItem(title: titleTextField, dueDate: dueDate, selectedProjectIds: selectedProjectIds)
             presentationMode.wrappedValue.dismiss()
         } else {
@@ -112,13 +114,16 @@ struct AddActionView: View {
 
 struct AddActionView_Previews: PreviewProvider {
     static var previews: some View {
+        let coordinator: ProjectActionCoordinator = ProjectActionCoordinator()
+
         NavigationView {
             AddActionView()
         }
-        .environmentObject(NextActionsViewModel(allProjectsViewModel: AllProjectsViewModel()))
-        .environmentObject(AllProjectsViewModel())
+        .environmentObject(NextActionsViewModel( coordinator: coordinator))
+        .environmentObject(AllProjectsViewModel(coordinator: coordinator))
     }
 }
+
 
 
 

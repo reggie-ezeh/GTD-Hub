@@ -15,7 +15,7 @@ struct Project: Identifiable, Codable, Hashable {
     var nextAction: UUID?
     var isActive: Bool
     var isCompleted: Bool
-    let completionPercentage: Int
+    var completionPercentage: Int
     var doneDate: Date?
     
     // Implementing Hashable protocol
@@ -27,7 +27,9 @@ struct Project: Identifiable, Codable, Hashable {
         hasher.combine(id)
     }
     
-    init(id: UUID = UUID(), title: String, dueDate: Date? = nil, actions: [UUID] = [], nextAction: UUID? = nil, activeProject: Bool = true, isCompleted: Bool = false, completionPercentage: Int = 0, doneDate: Date? = nil) {
+    init(id: UUID = UUID(), title: String, dueDate: Date? = nil,
+         actions: [UUID] = [], nextAction: UUID? = nil, activeProject: Bool = true,
+         isCompleted: Bool = false, completionPercentage: Int = 0, doneDate: Date? = nil) {
         self.id = id
         self.title = title
         self.dueDate = dueDate
@@ -43,34 +45,25 @@ struct Project: Identifiable, Codable, Hashable {
         let newTitle = title ?? self.title
         let newDueDate = dueDate ?? self.dueDate
         let newActions = actions ?? self.actionIds
-        return Project(id: id, title: newTitle, dueDate: newDueDate, actions: newActions, nextAction: nextAction, activeProject: isActive, isCompleted: isCompleted, completionPercentage: completionPercentage, doneDate: doneDate)
+        return Project(id: id, title: newTitle, dueDate: newDueDate, actions: newActions,
+                       nextAction: nextAction, activeProject: isActive, isCompleted: isCompleted,
+                       completionPercentage: completionPercentage, doneDate: doneDate)
     }
     
     func updateActiveStatus() -> Project {
-        return Project(id: id, title: title, dueDate: dueDate, actions: actionIds, nextAction: nextAction, activeProject: !isActive, isCompleted: isCompleted, completionPercentage: completionPercentage, doneDate: doneDate)
+        return Project(id: id, title: title, dueDate: dueDate, actions: actionIds,
+                       nextAction: nextAction, activeProject: !isActive,
+                       isCompleted: isCompleted, completionPercentage: completionPercentage, doneDate: doneDate)
     }
+        
     
-    func updateNextAction() -> Project {
-        let incompleteActions = actions.filter { !$0.isCompleted }
-        let nextAction = incompleteActions.sorted { $0.dueDate ?? .distantFuture < $1.dueDate ?? .distantFuture }.first
-        return Project(id: id, title: title, dueDate: dueDate, actions: actions, nextAction: nextAction, activeProject: isActive, isCompleted: isCompleted, completionPercentage: completionPercentage, doneDate: doneDate)
-    }
-    
-    func updateCompletionStatus() -> Project {
-        let completedCount = actions.filter { $0.isCompleted }.count
-        let newCompletionPercentage = Int((Double(completedCount) / Double(actions.count)) * 100)
-        let newIsCompleted = newCompletionPercentage == 100
-        return Project(id: id, title: title, dueDate: dueDate, actions: actions, nextAction: nextAction, activeProject: isActive, isCompleted: newIsCompleted, completionPercentage: newCompletionPercentage, doneDate: doneDate)
-    }
-    
-    func updateDone() -> Project {
+    func updateDoneDate() -> Project {
         let newDoneDate = isActive ? Date() : nil
-        return Project(id: id, title: title, dueDate: dueDate, actions: actionIds, nextAction: nextAction, activeProject: !isActive, isCompleted: isCompleted, completionPercentage: completionPercentage, doneDate: newDoneDate)
+        return Project(id: id, title: title, dueDate: dueDate, actions: actionIds,
+                       nextAction: nextAction, activeProject: !isActive,
+                       isCompleted: isCompleted, completionPercentage: completionPercentage, doneDate: newDoneDate)
     }
     
-    func removeAction(id: String) -> Project {
-        let newActions = actions.filter { $0.id != id }
-        return Project(id: self.id, title: title, dueDate: dueDate, actions: newActions, nextAction: nextAction, activeProject: isActive, isCompleted: isCompleted, completionPercentage: completionPercentage, doneDate: doneDate)
-    }
+
     }
 

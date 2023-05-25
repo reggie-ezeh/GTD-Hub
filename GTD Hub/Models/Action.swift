@@ -16,29 +16,27 @@ struct Action: Identifiable, Codable {
     let isCompleted: Bool
     let dueDate: Date?
     let completionDate: Date?
-    let projectIds: [UUID]
     
-    init(id: UUID = UUID(), title: String, isCompleted: Bool, dueDate: Date? = nil, completionDate: Date? = nil, projectIds: [UUID] = []) {
+    init(id: UUID = UUID(), title: String, isCompleted: Bool, dueDate: Date? = nil, completionDate: Date? = nil) {
         self.id = id
         self.title = title
         self.isCompleted = isCompleted
         self.dueDate = dueDate
         self.completionDate = completionDate
-        self.projectIds = projectIds
     }
     
     func updateCompletion() -> Action {
         // isCompleted will be false originally when the toggle is set to true
         let updatedCompletionDate = isCompleted ? nil : Date()
-        return Action(id: id, title: title, isCompleted: !isCompleted, dueDate: dueDate, completionDate: updatedCompletionDate, projectIds: projectIds)
+        return Action(id: id, title: title, isCompleted: !isCompleted, dueDate: dueDate, completionDate: updatedCompletionDate)
     }
 
     func updateTitle(newTitle: String) -> Action {
-        return Action(id: id, title: newTitle, isCompleted: isCompleted, dueDate: dueDate, completionDate: completionDate, projectIds: projectIds)
+        return Action(id: id, title: newTitle, isCompleted: isCompleted, dueDate: dueDate, completionDate: completionDate)
     }
 
     func updateDueDate(newDueDate: Date) -> Action {
-        return Action(id: id, title: title, isCompleted: isCompleted, dueDate: newDueDate, completionDate: completionDate, projectIds: projectIds)
+        return Action(id: id, title: title, isCompleted: isCompleted, dueDate: newDueDate, completionDate: completionDate)
     }
 }
 

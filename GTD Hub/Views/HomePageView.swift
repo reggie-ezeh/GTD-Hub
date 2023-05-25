@@ -18,24 +18,51 @@ struct HomePageView: View {
 
     var body: some View {
             VStack {
-                VStack(spacing: 50) {
+                VStack(spacing: 20) {
+                    Spacer()
+                    Text("GTD HUB")
+                        .font(.system(size: 50, weight: .bold, design: .default))
+
+                        .foregroundColor(Color(hue: 0.492, saturation: 0.871, brightness: 0.497))
+                    Spacer()
+                    
                     NavigationLink(destination: InboxPageView()) {
                         Text("Inbox")
                             .font(.title)
                             .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                            .frame(width: 200.0, height: 70.0)
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
                     NavigationLink(destination: NextActionsView()) {
                         Text("Next Actions")
+                            .font(.title)
+                            .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                            .frame(width: 200.0, height: 70.0)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
                     NavigationLink(destination: ActiveProjectsListView()) {
                         Text("Projects")
+                            .font(.title)
+                            .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                            .frame(width: 200.0, height: 70.0)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
                     NavigationLink(destination: ReferencesView()) {
                         Text("References")
+                            .font(.title)
+                            .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+                            .frame(width: 200.0, height: 70.0)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
+                    Spacer()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 

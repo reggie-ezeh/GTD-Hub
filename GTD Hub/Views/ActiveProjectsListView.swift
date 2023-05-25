@@ -13,9 +13,9 @@ struct ActiveProjectsListView: View {
     
     var body: some View {
             ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 200))]) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 200))], spacing: 20) {
                     ForEach(allProjectsViewModel.allProjectItems.filter { $0.isActive })  { project in
-                        NavigationLink(destination: ProjectPageView(project: project).environmentObject(allProjectsViewModel)) {
+                        NavigationLink(destination: ProjectPageView(projectId: project.id).environmentObject(allProjectsViewModel)) {
                             ProjectItemView(project: project)
                         }
                     }
@@ -36,6 +36,6 @@ struct ActiveProjectsListView_Previews: PreviewProvider {
         NavigationView {
             ActiveProjectsListView()
         }
-            .environmentObject(AllProjectsViewModel())
+        .environmentObject(AllProjectsViewModel(coordinator: ProjectActionCoordinator()))
     }
 }

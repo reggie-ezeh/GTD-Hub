@@ -7,6 +7,24 @@
 
 import SwiftUI
 
+enum InboxAction: Identifiable {
+    case createProject(InboxItem)
+    case addToNextActions(InboxItem)
+    case addAsReference(InboxItem)
+
+    var id: String {
+        switch self {
+        case .createProject(let item):
+            return item.id
+        case .addToNextActions(let item):
+            return item.id
+        case .addAsReference(let item):
+            return item.id
+        }
+    }
+}
+
+
 struct InboxPageView: View {
     @EnvironmentObject var inboxViewModel: InboxViewModel
     @EnvironmentObject var allProjectsViewModel: AllProjectsViewModel
@@ -19,6 +37,11 @@ struct InboxPageView: View {
     @State private var showAddToNextActions = false
     @State private var showAddAsReference = false
     @State private var showActionSheet = false
+    @State private var currentAction: InboxAction?
+    
+    @State private var inboxItemMovedOut = false
+
+
     
     var body: some View {
 
@@ -34,45 +57,50 @@ struct InboxPageView: View {
                             Image(systemName: "ellipsis.circle")
                         }
                         .actionSheet(isPresented: $showActionSheet) {
-                            ActionSheet(title: Text("Options"), buttons: [
-                                .default(Text("Create new project")) {
-                                    self.showCreateProject = true
-                                },
-                                .default(Text("Add to Project")) {
-                                    self.showAddToProject = true
-                                },
-                                .default(Text("Add to Next Actions")) {
-                                    self.showAddToNextActions = true
-                                },
-                                .default(Text("Add as Reference")) {
-                                    self.showAddAsReference = true
-                                },
-                                .destructive(Text("Delete")) {
-                                    inboxViewModel.deleteInboxItem(id: item.id)
-                                },
-                                .cancel()
-                            ])
-                        }
-                    }
+                             ActionSheet(title: Text("Options"), buttons: [
+                                 .default(Text("Add as Actionable Item")) {
+                                     self.currentAction = .addToNextActions(self.selectedInboxItem!)
+                                     self.inboxItemMovedOut = true
+                                 },
+                                 .default(Text("Create new project")) {
+                                     self.currentAction = .createProject(self.selectedInboxItem!)
+                                     self.inboxItemMovedOut = true
+                                 },
+                                 .default(Text("Add as Reference")) {
+                                     self.currentAction = .addAsReference(self.selectedInboxItem!)
+                                     self.inboxItemMovedOut = true
+                                 },
+                                 .destructive(Text("Delete")) {
+                                     inboxViewModel.deleteInboxItem(id: self.selectedInboxItem!.id)
+                                 },
+                                 .cancel()
+                             ])
+                         }                    }
                 }
             }
             .navigationTitle("Inbox")
-            .fullScreenCover(item: $selectedInboxItem) { selectedItem in
-                if self.showCreateProject {
-                    AddProjectView(projectName: selectedItem.title)
+            .fullScreenCover(item: $currentAction) { action in
+                switch action {
+                case .createProject(let item):
+                    AddProjectView(projectName: item.title)
                         .environmentObject(allProjectsViewModel)
-                } else if self.showAddToProject {
-                    AddActionView(title: selectedItem.title)
+                case .addToNextActions(let item):
+                    AddActionView(title: item.title)
                         .environmentObject(nextActionsViewModel)
                         .environmentObject(allProjectsViewModel)
-                } else if self.showAddToNextActions {
-                    AddActionView(title: selectedItem.title)
-                        .environmentObject(nextActionsViewModel)
-                        .environmentObject(allProjectsViewModel)
-                } else if self.showAddAsReference {
-                    AddReferenceView(title: selectedItem.title, viewModel: referencesViewModel)
+                case .addAsReference(let item):
+                    AddReferenceView(title: item.title, viewModel: referencesViewModel)
                 }
             }
+        
+            .onChange(of: inboxItemMovedOut) { value in
+                if value {
+                    inboxViewModel.deleteInboxItem(id: selectedInboxItem!.id)
+                    inboxItemMovedOut = false
+                }
+            }
+
+        
             .navigationBarItems(trailing: NavigationLink(destination: AddInboxItemView()) {
                 Image(systemName: "plus")
             }

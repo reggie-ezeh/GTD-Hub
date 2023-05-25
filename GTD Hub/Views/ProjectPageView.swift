@@ -9,45 +9,132 @@
 import SwiftUI
 
 struct ProjectPageView: View {
-    @EnvironmentObject var nextActionsViewModel: NextActionsViewModel
     @EnvironmentObject var allProjectsViewModel: AllProjectsViewModel
+    @EnvironmentObject var nextActionsViewModel: NextActionsViewModel
     @State private var showActionSheet = false
-    @State private var showListView = true
+    @State private var showTimelineView = false
     @State private var showAddActionView = false
     @State private var showEditProjectView = false
     
-    let project: Project
+    let projectId: UUID
     
+    var project: Project? {
+        allProjectsViewModel.allProjectItems.first { $0.id == projectId }
+    }
+    
+    //Sort actions by their due dates. actions with no due date are placed at the end
+    var projectActions: [Action] {
+        let actions = nextActionsViewModel.coordinator.actions.filter { action in
+            project?.actionIds.contains(action.id) ?? false
+        }
+        return actions.sorted(by: { ($0.dueDate ?? Date.distantFuture) < ($1.dueDate ?? Date.distantFuture) })
+    }
+
+
     
     var body: some View {
-        VStack {
-            if let nextAction = project.nextAction {
-                Text("Next Action: \(nextAction.title)")
-            }
-            
-            Toggle(isOn: $showListView) {
-                Text("Toggle between List and Timeline view")
-            }
-          
-            // Date.distantFuture as the default value when the dueDate is nil. This ensures that actions without a due date will be sorted to the end of the list.
-            if showListView {
-                
-                List {
-                    ForEach(project.actions.sorted(by: { ($0.dueDate ?? Date.distantFuture) < ($1.dueDate ?? Date.distantFuture) })) { action in
-                        Button(action: {
-                            nextActionsViewModel.updateActionCompletionStatus(inputAction: action)
-                        }) {
-                            Text(action.title)
+
+        GeometryReader { geometry in
+            VStack (spacing: 0) {
+                VStack {
+
+                    
+                    Text(project?.title ?? "")
+                        .font(.title)
+                        .foregroundColor(Color(hue: 0.663, saturation: 0.953, brightness: 0.896))
+                        .padding(.bottom, 18.0)
+                    
+                    
+                    if let nextActionId = project?.nextAction,
+                       let nextAction = nextActionsViewModel.allActionItems.first(where: { $0.id == nextActionId }) {
+                        VStack {
+                            Text("Up Next: \(nextAction.title)")
+                                .font(.headline)
+                                .foregroundColor(.blue)
+                            
+                            nextAction.dueDate.map { dueDate in
+                                Text("due on: \(DateFormatter.localizedString(from: dueDate, dateStyle: .short, timeStyle: .none))")
+                                    .font(.caption)
+                                    .foregroundColor(.yellow)
+                            }
+                        }
+
+                    }
+
+                    
+                    VStack(alignment: .leading) {
+                        Text("Progress: \(project?.completionPercentage ?? 0)%")
+                            .font(.headline)
+                        
+                        GeometryReader { geometry in
+                            ProgressBar(progress: Float((project?.completionPercentage ?? 0)) / 100.0)
+                                .frame(height: 15)
+                                .frame(width: geometry.size.width - 30)
+                        }
+                        .frame(height: 4.0)
+                    }
+                    .padding(.vertical, 14.0)
+                    
+                    HStack {
+                        Spacer()
+                        VStack {
+                            Text("Timeline View")
+                                .font(.system(size: 14))
+                                .foregroundColor(.black)
+                            Toggle("", isOn: $showTimelineView)
+                                .labelsHidden()
                         }
                     }
+                    .padding([.top, .leading, .trailing], 2.0)
+
+                    Text("Project Actions")
+                        .font(.headline)
+                        .padding(.top, 6.0)
+                    
+                    Text("Tap on actions to mark them complete")
+                        .foregroundColor(.orange)
+                        .font(.caption)
+
+                    
                 }
-            }
-             else {
-                            
-                 TimelineView(actions: project.actions)
+                .padding(.horizontal)
+
+                VStack {
+
+                    if showTimelineView {
+                        TimelineView(actions: projectActions, viewModel: nextActionsViewModel)
+                    } else {
+                        List {
+                            ForEach(projectActions.sorted(by: { ($0.dueDate ?? Date.distantFuture) < ($1.dueDate ?? Date.distantFuture) })) { action in
+                                ActionItemView(action: action, actionCompletion: {
+                                    nextActionsViewModel.updateActionCompletionStatus(inputAction: action)
+                                    if let project = project {
+                                        allProjectsViewModel.updateProjectActionInfo(project: project)
+                                    }
+                                }, color: action.isCompleted ? .green : .black)
+                            }
                         }
+                        
+                    }
+                    
+                    
+                }
+                .frame(height: geometry.size.height * 0.50)
+                .padding(.horizontal)
+
+            }
         }
-        .navigationBarTitle(project.title, displayMode: .inline)
+        
+        
+    
+        
+        
+        
+        
+        
+        
+        
+        .padding(.bottom, 40.0)
         .navigationBarItems(trailing: Button(action: {
             showActionSheet = true
         }) {
@@ -62,45 +149,48 @@ struct ProjectPageView: View {
                     showEditProjectView = true
                 },
                 .default(Text("Delete Project")) {
-                                    if let projectIndex = allProjectsViewModel.allProjectItems.firstIndex(where: { $0.id == project.id }) {
-                                        allProjectsViewModel.removeProject(at: IndexSet(integer: projectIndex))
-                                    }
-                                },
-                                .default(Text(project.isActive ? "Mark Project as Done" : "Unmark Done")) {
-                                    allProjectsViewModel.updateProjectDoneStatus(project: project)
-                                },
-                                .cancel()
-                            ])
+                    if let project = project,
+                       let projectIndex = allProjectsViewModel.allProjectItems.firstIndex(where: { $0.id == project.id }) {
+                        allProjectsViewModel.removeProject(at: IndexSet(integer: projectIndex))
+                    }
+                },
+                .default(Text(project?.isActive ?? false ? "Mark Project as Done" : "Unmark Done")) {
+                    if let project = project {
+                        allProjectsViewModel.updateProjectActiveStatus(project: project)
+                    }
+                },
+                .cancel()
+            ])
         }
         .sheet(isPresented: $showAddActionView) {
-            AddActionView(associatedProject: project)
+            AddActionView(associatedProjectId: projectId)
                 .environmentObject(nextActionsViewModel)
-                .environmentObject(allProjectsViewModel)
         }
         .sheet(isPresented: $showEditProjectView) {
-            EditProjectView(project: project)
-                .environmentObject(allProjectsViewModel)
+            if let project = project {
+                EditProjectView(project: project)
+                    .environmentObject(allProjectsViewModel)
+            }
         }
         .onAppear {
-            allProjectsViewModel.updateProjectNextAction(project: project)
-            testAddProjectAction(project: project)
+            if let project = project {
+                allProjectsViewModel.updateProjectActionInfo(project: project)
+            }
         }
-    }
-    
-    
-    
-    func testAddProjectAction(project: Project) {
-        print("Action count: \(project.actions.count)")
-        for action in project.actions {
-            print("Action title: \(action.title)")
-        }
+        
+        
+        
     }
 }
 
 struct ProjectPageView_Previews: PreviewProvider {
     static var previews: some View {
-        ProjectPageView(project: Project(title: "Sample Project")).environmentObject(AllProjectsViewModel()).environmentObject(NextActionsViewModel())
+        let coordinator: ProjectActionCoordinator = ProjectActionCoordinator()
+        let allProjectsVM = AllProjectsViewModel(coordinator: coordinator)
+        let nextActionsVM = NextActionsViewModel(coordinator: coordinator)
+        ProjectPageView(projectId: UUID()).environmentObject(allProjectsVM).environmentObject(nextActionsVM)
     }
 }
+
 
 
